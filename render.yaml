@@ -1,14 +1,18 @@
-services:
-  - type: pserv
-    name: crewensia-db
+databases:
+  - name: crewensia-db
     plan: free
+    region: singapore
+    postgresMajorVersion: "17"
     databaseName: crewensia
     user: crewensia
+
+services:
   - type: web
     name: crewensia-api
     runtime: docker
     plan: free
-    dockerfilePath: ./apps/server/Dockerfile
+    region: singapore
+    dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/health
     envVars:
@@ -16,5 +20,7 @@ services:
         fromDatabase:
           name: crewensia-db
           property: connectionString
+      - key: API_PORT
+        value: "3000"
       - key: CLIENT_ORIGIN
         value: http://localhost:5173

@@ -1,7 +1,7 @@
 import { app } from './app.js';
 import { prisma } from './db.js';
 
-const port = Number(process.env.API_PORT ?? 3000);
+const port = Number(process.env.PORT ?? process.env.API_PORT ?? 3000);
 const server = app.listen(port, () => {
   console.log(`Crewensia API listening on http://localhost:${port}`);
 });
