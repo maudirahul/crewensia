@@ -9,9 +9,9 @@ import { meRouter } from './routes/me.routes.js';
 import { organizersRouter } from './routes/organizers.routes.js';
 
 export const app = express();
-const clientOrigin = process.env.CLIENT_ORIGIN ?? 'http://localhost:5173';
+const clientOrigins = (process.env.CLIENT_ORIGIN ?? 'http://localhost:5173').split(',').map((origin) => origin.trim()).filter(Boolean);
 
-app.use(cors({ origin: clientOrigin }));
+app.use(cors({ origin: clientOrigins.length === 1 ? clientOrigins[0] : clientOrigins }));
 app.use(express.json({ limit: '1mb' }));
 
 app.get('/api/health', (_request, response) => {
