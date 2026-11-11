@@ -1,0 +1,29 @@
+$kind: http-example
+name: Volunteer role required.
+request:
+  url: "{{baseUrl}}/api/me/volunteer-profile"
+  method: PATCH
+  headers:
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "homeCity": "string",
+        "locality": "string",
+        "skills": [
+          "string",
+          "string"
+        ]
+      }
+response:
+  statusCode: 403
+  statusText: Forbidden
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 2000

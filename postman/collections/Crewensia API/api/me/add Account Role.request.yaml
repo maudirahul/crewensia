@@ -1,0 +1,24 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/api/me/roles"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "role": "ORGANIZER",
+      "homeCity": "string",
+      "organizationName": "string",
+      "credentialType": "string",
+      "credentialDetails": "string"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+settings: {}
+examples: ./.resources/add Account Role.resources/examples
+order: 5000

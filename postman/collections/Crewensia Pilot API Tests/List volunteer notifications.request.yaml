@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/notifications"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{volunteerToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 200', function () { pm.response.to.have.status(200); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+      const rows=pm.response.json().data; const row=rows.find(n=>n.applicationId===pm.collectionVariables.get('applicationId')); pm.test('Application decision notification exists',()=>pm.expect(row).to.exist); if(row) pm.collectionVariables.set('notificationId',row.id);
+    language: text/javascript
+order: 25000

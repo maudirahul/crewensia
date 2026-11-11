@@ -1,0 +1,1311 @@
+{
+  "info": {
+    "_postman_id": "ef44080f-1a99-4c38-b729-e6a7fa000001",
+    "name": "Crewensia Pilot API Tests",
+    "description": "Stateful end-to-end Postman checks for all implemented Crewensia pilot API operations. Creates temporary accounts and an event; clean up test data after a run.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{organizerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "organizerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "volunteerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "organizerEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "volunteerEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "verificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "eventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "firstShiftId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "secondShiftId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "applicationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "withdrawApplicationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "eventStartsAt",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "eventEndsAt",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "deadline",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shiftOneStart",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shiftOneEnd",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shiftTwoStart",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shiftTwoEnd",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testPassword",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/health",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "pm.test('Health status is ok',()=>pm.expect(pm.response.json().status).to.eql('ok'));",
+              "const id=Date.now().toString();",
+              "pm.collectionVariables.set('organizerEmail','crewensia-org-'+id+'@example.test');",
+              "pm.collectionVariables.set('volunteerEmail','crewensia-vol-'+id+'@example.test');",
+              "const start=new Date(Date.now()+14*86400000); start.setUTCHours(9,0,0,0);",
+              "const end=new Date(start.getTime()+9*3600000);",
+              "const deadline=new Date(start.getTime()-7*86400000);",
+              "pm.collectionVariables.set('eventStartsAt',start.toISOString());",
+              "pm.collectionVariables.set('eventEndsAt',end.toISOString());",
+              "pm.collectionVariables.set('deadline',deadline.toISOString());",
+              "pm.collectionVariables.set('shiftOneStart',start.toISOString());",
+              "pm.collectionVariables.set('shiftOneEnd',new Date(start.getTime()+4*3600000).toISOString());",
+              "pm.collectionVariables.set('shiftTwoStart',new Date(start.getTime()+5*3600000).toISOString());",
+              "pm.collectionVariables.set('shiftTwoEnd',end.toISOString());"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sign up organizer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/signup",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman Organizer\",\n  \"email\": \"{{organizerEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"initialRole\": \"ORGANIZER\",\n  \"phone\": \"+910000000001\",\n  \"organizationName\": \"Crewensia Postman Test Org\",\n  \"credentialType\": \"Pilot test credential\",\n  \"credentialDetails\": \"Temporary account created by the Crewensia Postman API collection.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "const j=pm.response.json().data; pm.collectionVariables.set('organizerToken',j.session.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sign up volunteer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/signup",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman Volunteer\",\n  \"email\": \"{{volunteerEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"initialRole\": \"VOLUNTEER\",\n  \"phone\": \"+910000000002\",\n  \"homeCity\": \"Postman Test City\",\n  \"locality\": \"Test Locality\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "const j=pm.response.json().data; pm.collectionVariables.set('volunteerToken',j.session.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Log in organizer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{organizerEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "const j=pm.response.json().data; pm.collectionVariables.set('organizerToken',j.session.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Log in volunteer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{volunteerEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "const j=pm.response.json().data; pm.collectionVariables.set('volunteerToken',j.session.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Log in admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "const j=pm.response.json().data; pm.collectionVariables.set('adminToken',j.session.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List pending organizer verifications",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/admin/organizer-verifications?status=PENDING",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "const j=pm.response.json(); const email=pm.collectionVariables.get('organizerEmail'); const item=j.data.find(x=>x.organizer.user.email===email); pm.test('New organizer verification is listed',()=>pm.expect(item).to.exist); if(item) pm.collectionVariables.set('verificationId',item.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Approve organizer verification",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/admin/organizer-verifications/{{verificationId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"decision\": \"APPROVED\",\n  \"notes\": \"Approved for the local pilot API test.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "pm.test('Verification approved',()=>pm.expect(pm.response.json().data.status).to.eql('APPROVED'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get organizer profile",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/organizers/me",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{organizerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "pm.test('Organizer is approved',()=>pm.expect(pm.response.json().data.verificationStatus).to.eql('APPROVED'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Resubmit approved verification returns conflict",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/organizers/me/verification-requests",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"credentialType\": \"Pilot test credential\",\n  \"credentialDetails\": \"Already approved.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{organizerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.response.to.have.status(409); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update current profile",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/me/profile",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman Volunteer Updated\",\n  \"phone\": \"+910000000003\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{volunteerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update volunteer profile",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/me/volunteer-profile",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"homeCity\": \"Postman Test City\",\n  \"locality\": \"Updated Locality\",\n  \"skills\": [\n    \"first-aid\",\n    \"event-support\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{volunteerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Add organizer role",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/me/roles",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"role\": \"ORGANIZER\",\n  \"organizationName\": \"Secondary Postman Org\",\n  \"credentialType\": \"Local test\",\n  \"credentialDetails\": \"Created to test role switching.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{volunteerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Switch to organizer role",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/me/active-role",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"role\": \"ORGANIZER\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{volunteerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "pm.test('Active role changed',()=>pm.expect(pm.response.json().data.user.activeRole).to.eql('ORGANIZER'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Switch back to volunteer role",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/me/active-role",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"role\": \"VOLUNTEER\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{volunteerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get current user",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/me",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{volunteerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create event",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/events",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Postman Pilot Volunteer Event\",\n  \"description\": \"Temporary event created while exercising the Crewensia API.\",\n  \"venueName\": \"Test Hall\",\n  \"venueAddress\": \"1 Test Street\",\n  \"locality\": \"Test Locality\",\n  \"city\": \"Postman Test City\",\n  \"startsAt\": \"{{eventStartsAt}}\",\n  \"endsAt\": \"{{eventEndsAt}}\",\n  \"applicationDeadline\": \"{{deadline}}\",\n  \"category\": \"Community\",\n  \"eligibility\": \"Pilot API test participants.\",\n  \"benefits\": \"No real payment; test only.\",\n  \"roles\": [\n    {\n      \"title\": \"Event Helper\",\n      \"responsibilities\": \"Support event check-in.\",\n      \"requiredSkills\": [\n        \"first-aid\",\n        \"event-support\"\n      ],\n      \"compensationType\": \"UNPAID\",\n      \"shifts\": [\n        {\n          \"startsAt\": \"{{shiftOneStart}}\",\n          \"endsAt\": \"{{shiftOneEnd}}\",\n          \"openings\": 2\n        },\n        {\n          \"startsAt\": \"{{shiftTwoStart}}\",\n          \"endsAt\": \"{{shiftTwoEnd}}\",\n          \"openings\": 2\n        }\n      ]\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{organizerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "const e=pm.response.json().data; pm.collectionVariables.set('eventId',e.id); pm.collectionVariables.set('firstShiftId',e.roles[0].shifts[0].id); pm.collectionVariables.set('secondShiftId',e.roles[0].shifts[1].id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Publish event",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/events/{{eventId}}/publish",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{organizerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "pm.test('Event is published',()=>pm.expect(pm.response.json().data.status).to.eql('PUBLISHED'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List events by city role and skill",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/events?city=Postman%20Test%20City&role=Event%20Helper&skill=first-aid",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "const rows=pm.response.json().data; pm.test('New event appears in discovery',()=>pm.expect(rows.some(e=>e.id===pm.collectionVariables.get('eventId'))).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get event details",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/events/{{eventId}}",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Apply to first shift",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/shifts/{{firstShiftId}}/applications",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"I can help with event check-in.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{volunteerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "pm.collectionVariables.set('applicationId',pm.response.json().data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List applications for event",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/organizers/me/events/{{eventId}}/applications?status=PENDING",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{organizerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "const rows=pm.response.json().data; pm.test('Volunteer application is listed',()=>pm.expect(rows.some(a=>a.id===pm.collectionVariables.get('applicationId'))).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Approve application",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/applications/{{applicationId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"decision\": \"APPROVED\",\n  \"note\": \"Approved by the local API test.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{organizerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "pm.test('Application is approved',()=>pm.expect(pm.response.json().data.status).to.eql('APPROVED'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List my applications",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/me/applications",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{volunteerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "const rows=pm.response.json().data; pm.test('Application appears in volunteer history',()=>pm.expect(rows.some(a=>a.id===pm.collectionVariables.get('applicationId'))).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List volunteer notifications",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/me/notifications",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{volunteerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "const rows=pm.response.json().data; const row=rows.find(n=>n.applicationId===pm.collectionVariables.get('applicationId')); pm.test('Application decision notification exists',()=>pm.expect(row).to.exist); if(row) pm.collectionVariables.set('notificationId',row.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mark notification read",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": "{{baseUrl}}/api/me/notifications/{{notificationId}}/read",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{volunteerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "pm.test('Notification is marked read',()=>pm.expect(pm.response.json().data.readAt).to.exist);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Apply to second shift",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/shifts/{{secondShiftId}}/applications",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Second-shift withdrawal flow.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{volunteerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "pm.collectionVariables.set('withdrawApplicationId',pm.response.json().data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Withdraw second-shift application",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/applications/{{withdrawApplicationId}}/withdraw",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{volunteerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "pm.test('Application is withdrawn',()=>pm.expect(pm.response.json().data.status).to.eql('WITHDRAWN'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cancel event",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/events/{{eventId}}/cancel",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reason\": \"Temporary event cleanup after API workflow test.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{organizerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "pm.test('Event is cancelled',()=>pm.expect(pm.response.json().data.status).to.eql('CANCELLED'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Log out volunteer",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/auth/logout",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{volunteerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 204', function () { pm.response.to.have.status(204); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Log out organizer",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/auth/logout",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{organizerToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 204', function () { pm.response.to.have.status(204); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Log out admin",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/auth/logout",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 204', function () { pm.response.to.have.status(204); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

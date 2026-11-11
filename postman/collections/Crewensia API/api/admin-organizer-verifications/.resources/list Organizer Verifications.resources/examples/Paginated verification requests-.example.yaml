@@ -1,0 +1,24 @@
+$kind: http-example
+name: Paginated verification requests.
+request:
+  url: "{{baseUrl}}/api/admin/organizer-verifications?status=APPROVED&page=1"
+  method: GET
+  headers:
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  queryParams:
+    status: APPROVED
+    page: "1"
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

@@ -1,0 +1,29 @@
+$kind: http-example
+name: Account created and signed in.
+request:
+  url: "{{baseUrl}}/api/auth/signup"
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+        "name": "string",
+        "email": "dyOLgnSqNR47-lK@jHXPcqtmrPKCkkDlaO.jr",
+        "password": "stringstring",
+        "initialRole": "VOLUNTEER",
+        "phone": "string",
+        "locality": "string",
+        "homeCity": "string",
+        "organizationName": "string",
+        "credentialType": "string",
+        "credentialDetails": "string"
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

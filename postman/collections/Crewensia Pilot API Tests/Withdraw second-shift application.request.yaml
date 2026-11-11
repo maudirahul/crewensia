@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/applications/{{withdrawApplicationId}}/withdraw"
+method: POST
+auth:
+  type: bearer
+  credentials:
+    token: "{{volunteerToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 200', function () { pm.response.to.have.status(200); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+      pm.test('Application is withdrawn',()=>pm.expect(pm.response.json().data.status).to.eql('WITHDRAWN'));
+    language: text/javascript
+order: 28000

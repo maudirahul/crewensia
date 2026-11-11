@@ -1,0 +1,30 @@
+$kind: http-example
+name: Event owner access required.
+request:
+  url: "{{baseUrl}}/api/applications/:applicationId"
+  method: PATCH
+  headers:
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  pathVariables:
+    - key: applicationId
+      value: string
+      disabled: false
+      description: "(Required) "
+  body:
+    type: json
+    content: |-
+      {
+        "decision": "REJECTED",
+        "note": "string"
+      }
+response:
+  statusCode: 403
+  statusText: Forbidden
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 2000

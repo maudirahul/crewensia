@@ -1,0 +1,24 @@
+$kind: http-example
+name: Active interface role changed.
+request:
+  url: "{{baseUrl}}/api/me/active-role"
+  method: PATCH
+  headers:
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "role": "ORGANIZER"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

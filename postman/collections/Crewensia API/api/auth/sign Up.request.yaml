@@ -1,0 +1,25 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/api/auth/signup"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "string",
+      "email": "dyOLgnSqNR47-lK@jHXPcqtmrPKCkkDlaO.jr",
+      "password": "stringstring",
+      "initialRole": "VOLUNTEER",
+      "phone": "string",
+      "locality": "string",
+      "homeCity": "string",
+      "organizationName": "string",
+      "credentialType": "string",
+      "credentialDetails": "string"
+    }
+settings: {}
+examples: ./.resources/sign Up.resources/examples
+order: 1000

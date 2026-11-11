@@ -1,0 +1,28 @@
+$kind: http-example
+name: Role and corresponding profile created.
+request:
+  url: "{{baseUrl}}/api/me/roles"
+  method: POST
+  headers:
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "role": "ORGANIZER",
+        "homeCity": "string",
+        "organizationName": "string",
+        "credentialType": "string",
+        "credentialDetails": "string"
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

@@ -1,0 +1,5 @@
+$kind: collection
+description: Pilot API for event staffing in Bhubaneswar.
+variables:
+  baseUrl: http://localhost:3000
+  bearerToken: ""

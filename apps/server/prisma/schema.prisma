@@ -1,0 +1,476 @@
+generator client {
+  provider = "prisma-client"
+  output                  = "../src/generated/prisma"
+  generatedFileExtension  = "ts"
+  importFileExtension     = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AccountRole {
+  VOLUNTEER
+  ORGANIZER
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  RESTRICTED
+  SUSPENDED
+}
+
+enum OrganizerVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  NEEDS_INFORMATION
+}
+
+enum VerificationRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  NEEDS_INFORMATION
+}
+
+enum EventCompensationType {
+  PAID
+  UNPAID
+}
+
+enum CompensationBasis {
+  PER_HOUR
+  PER_SHIFT
+  PER_EVENT
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+  HIDDEN
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+  WAITLISTED
+  COMPLETED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  ABSENT
+  EXCUSED
+}
+
+enum EventUpdateType {
+  GENERAL
+  TIME_CHANGE
+  LOCATION_CHANGE
+  REQUIREMENT_CHANGE
+  CANCELLATION
+}
+
+enum NotificationType {
+  APPLICATION_RECEIVED
+  APPLICATION_APPROVED
+  APPLICATION_REJECTED
+  APPLICATION_WITHDRAWN
+  APPLICATION_WAITLISTED
+  ORGANIZER_VERIFICATION_UPDATED
+  EVENT_UPDATED
+  EVENT_CANCELLED
+  WAITLIST_OFFER
+  REPORT_STATUS_CHANGED
+}
+
+enum ReportReason {
+  MISLEADING_EVENT
+  SAFETY_CONCERN
+  PAYMENT_ISSUE
+  HARASSMENT
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+enum AdminSubjectType {
+  USER
+  ORGANIZER
+  VERIFICATION_REQUEST
+  EVENT
+  REPORT
+}
+
+enum AdminActionType {
+  ADMIN_PROMOTED
+  ORGANIZER_APPROVED
+  ORGANIZER_REJECTED
+  VERIFICATION_NEEDS_INFORMATION
+  EVENT_HIDDEN
+  EVENT_RESTORED
+  USER_RESTRICTED
+  USER_SUSPENDED
+  USER_RESTORED
+  REPORT_RESOLVED
+  REPORT_DISMISSED
+}
+
+model User {
+  id                    String                     @id @default(cuid())
+  email                 String                     @unique
+  emailVerifiedAt       DateTime?                  @db.Timestamptz(3)
+  passwordHash          String
+  name                  String
+  phone                 String?
+  roles                 AccountRole[]              @default([VOLUNTEER])
+  activeRole            AccountRole                @default(VOLUNTEER)
+  accountStatus         AccountStatus              @default(ACTIVE)
+  restrictionReason     String?
+  restrictedAt          DateTime?                  @db.Timestamptz(3)
+  organizerProfile      OrganizerProfile?
+  volunteerProfile      VolunteerProfile?
+  sessions              Session[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens   PasswordResetToken[]
+  applications          Application[]              @relation("Applicant")
+  applicationDecisions  Application[]              @relation("ApplicationDecidedBy")
+  applicationStatusChanges ApplicationStatusChange[] @relation("ApplicationStatusChangedBy")
+  attendanceRecords     AttendanceRecord[]         @relation("AttendanceRecorder")
+  verificationReviews   VerificationRequest[]      @relation("VerificationReviewer")
+  eventUpdates          EventUpdate[]              @relation("EventUpdateAuthor")
+  notifications         Notification[]
+  reportsFiled          Report[]                   @relation("ReportReporter")
+  reportsAgainst        Report[]                   @relation("ReportTargetUser")
+  reportsAssigned       Report[]                   @relation("ReportAssignee")
+  adminActions          AdminAction[]              @relation("AdminActionActor")
+  feedbackWritten       EventFeedback[]            @relation("FeedbackAuthor")
+  feedbackReceived      EventFeedback[]            @relation("FeedbackRecipient")
+  createdAt             DateTime                   @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime                   @updatedAt @db.Timestamptz(3)
+
+  @@index([accountStatus])
+}
+
+model Session {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  expiresAt  DateTime  @db.Timestamptz(3)
+  revokedAt  DateTime? @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([userId, expiresAt])
+}
+
+model EmailVerificationToken {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  expiresAt  DateTime  @db.Timestamptz(3)
+  usedAt     DateTime? @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([userId, expiresAt])
+}
+
+model PasswordResetToken {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  expiresAt  DateTime  @db.Timestamptz(3)
+  usedAt     DateTime? @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([userId, expiresAt])
+}
+
+model OrganizerProfile {
+  id                    String                       @id @default(cuid())
+  userId                String                       @unique
+  user                  User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationName      String?
+  verificationStatus    OrganizerVerificationStatus @default(PENDING)
+  verificationRequests  VerificationRequest[]
+  events                Event[]
+  createdAt             DateTime                     @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime                     @updatedAt @db.Timestamptz(3)
+
+  @@index([verificationStatus])
+}
+
+model VerificationRequest {
+  id                    String                       @id @default(cuid())
+  organizerId           String
+  organizer             OrganizerProfile             @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  status                VerificationRequestStatus    @default(PENDING)
+  credentialType        String
+  credentialDetails     String
+  documentReference     String?
+  submittedAt           DateTime                     @default(now()) @db.Timestamptz(3)
+  reviewedById          String?
+  reviewedBy            User?                        @relation("VerificationReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt            DateTime?                    @db.Timestamptz(3)
+  reviewNotes           String?
+
+  @@index([status, submittedAt])
+  @@index([organizerId, submittedAt])
+}
+
+model VolunteerProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  homeCity       String?
+  locality       String?
+  skills         String[] @default([])
+  availabilityWindows VolunteerAvailability[]
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([homeCity])
+}
+
+model VolunteerAvailability {
+  id          String           @id @default(cuid())
+  profileId   String
+  profile     VolunteerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  startsAt    DateTime         @db.Timestamptz(3)
+  endsAt      DateTime         @db.Timestamptz(3)
+  isAvailable Boolean          @default(true)
+  createdAt   DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime         @updatedAt @db.Timestamptz(3)
+
+  @@index([profileId, startsAt, endsAt, isAvailable])
+}
+
+model Event {
+  id                   String             @id @default(cuid())
+  organizerId          String
+  organizer            OrganizerProfile   @relation(fields: [organizerId], references: [id], onDelete: Restrict)
+  title                String
+  description          String
+  category             String?
+  venueName            String?
+  venueAddress         String
+  locality             String?
+  city                 String
+  latitude             Float?
+  longitude            Float?
+  startsAt             DateTime           @db.Timestamptz(3)
+  endsAt               DateTime           @db.Timestamptz(3)
+  applicationDeadline  DateTime           @db.Timestamptz(3)
+  eligibility          String?
+  benefits             String?
+  dressCode            String?
+  arrivalInstructions  String?
+  otherConditions      String?
+  status               EventStatus        @default(DRAFT)
+  publishedAt          DateTime?          @db.Timestamptz(3)
+  cancelledAt          DateTime?          @db.Timestamptz(3)
+  completedAt           DateTime?          @db.Timestamptz(3)
+  cancellationReason   String?
+  roles                EventRole[]
+  updates              EventUpdate[]
+  notifications        Notification[]
+  reports              Report[]
+  feedback             EventFeedback[]
+  createdAt            DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime           @updatedAt @db.Timestamptz(3)
+
+  @@index([city, status, startsAt])
+  @@index([organizerId, status])
+  @@index([applicationDeadline, status])
+}
+
+// A role can have multiple shifts. Each shift has its own capacity and applications.
+model EventRole {
+  id                  String       @id @default(cuid())
+  eventId             String
+  event               Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  title               String
+  responsibilities    String
+  requiredSkills      String[]     @default([])
+  compensationType    EventCompensationType
+  compensationAmount  Decimal?     @db.Decimal(10, 2)
+  compensationBasis   CompensationBasis?
+  expectedPaymentAt   String?
+  shifts              EventShift[]
+  createdAt           DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime     @updatedAt @db.Timestamptz(3)
+
+  @@index([eventId])
+}
+
+model EventShift {
+  id             String        @id @default(cuid())
+  eventRoleId    String
+  eventRole      EventRole     @relation(fields: [eventRoleId], references: [id], onDelete: Cascade)
+  startsAt       DateTime      @db.Timestamptz(3)
+  endsAt         DateTime      @db.Timestamptz(3)
+  openings       Int
+  applications   Application[]
+  createdAt      DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @db.Timestamptz(3)
+
+  @@index([startsAt, endsAt])
+}
+
+model Application {
+  id                       String                 @id @default(cuid())
+  eventShiftId             String
+  eventShift               EventShift             @relation(fields: [eventShiftId], references: [id], onDelete: Cascade)
+  volunteerId              String
+  volunteer                User                   @relation("Applicant", fields: [volunteerId], references: [id], onDelete: Cascade)
+  status                   ApplicationStatus      @default(PENDING)
+  message                  String?
+  appliedAt                DateTime               @default(now()) @db.Timestamptz(3)
+  decidedById              String?
+  decidedBy                User?                  @relation("ApplicationDecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
+  decidedAt                DateTime?              @db.Timestamptz(3)
+  statusHistory            ApplicationStatusChange[]
+  attendance               AttendanceRecord?
+  notifications            Notification[]
+  reports                  Report[]
+  organizerMarkedPaidAt    DateTime?              @db.Timestamptz(3)
+  volunteerReportedPaidAt  DateTime?              @db.Timestamptz(3)
+  createdAt                DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt                DateTime               @updatedAt @db.Timestamptz(3)
+
+  @@unique([eventShiftId, volunteerId])
+  @@index([eventShiftId, status])
+  @@index([volunteerId, status])
+}
+
+model ApplicationStatusChange {
+  id             String            @id @default(cuid())
+  applicationId  String
+  application    Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  fromStatus     ApplicationStatus?
+  toStatus       ApplicationStatus
+  changedById    String?
+  changedBy      User?             @relation("ApplicationStatusChangedBy", fields: [changedById], references: [id], onDelete: SetNull)
+  note           String?
+  createdAt      DateTime          @default(now()) @db.Timestamptz(3)
+
+  @@index([applicationId, createdAt])
+}
+
+model AttendanceRecord {
+  id             String           @id @default(cuid())
+  applicationId  String           @unique
+  application    Application      @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  status         AttendanceStatus
+  checkInAt      DateTime?        @db.Timestamptz(3)
+  checkOutAt     DateTime?        @db.Timestamptz(3)
+  notes          String?
+  recordedById   String
+  recordedBy     User             @relation("AttendanceRecorder", fields: [recordedById], references: [id], onDelete: Restrict)
+  recordedAt     DateTime         @default(now()) @db.Timestamptz(3)
+
+  @@index([recordedById, recordedAt])
+}
+
+model EventUpdate {
+  id          String          @id @default(cuid())
+  eventId     String
+  event       Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User            @relation("EventUpdateAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  type        EventUpdateType @default(GENERAL)
+  message     String
+  createdAt   DateTime        @default(now()) @db.Timestamptz(3)
+
+  @@index([eventId, createdAt])
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        NotificationType
+  title       String
+  message     String
+  eventId     String?
+  event       Event?            @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  applicationId String?
+  application Application?      @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  readAt      DateTime?        @db.Timestamptz(3)
+  createdAt   DateTime         @default(now()) @db.Timestamptz(3)
+
+  @@index([userId, readAt, createdAt])
+  @@index([eventId])
+}
+
+// Exactly one of eventId, targetUserId, or applicationId should be set; enforce this in the API.
+model Report {
+  id             String       @id @default(cuid())
+  reporterId     String
+  reporter       User         @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Restrict)
+  reason         ReportReason
+  description    String
+  eventId        String?
+  event          Event?       @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  targetUserId   String?
+  targetUser     User?        @relation("ReportTargetUser", fields: [targetUserId], references: [id], onDelete: SetNull)
+  applicationId  String?
+  application    Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  status         ReportStatus @default(OPEN)
+  assignedToId   String?
+  assignedTo     User?        @relation("ReportAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  adminNotes     String?
+  createdAt      DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime     @updatedAt @db.Timestamptz(3)
+  resolvedAt     DateTime?    @db.Timestamptz(3)
+
+  @@index([status, createdAt])
+  @@index([reporterId, createdAt])
+  @@index([eventId])
+  @@index([targetUserId])
+}
+
+model EventFeedback {
+  id           String   @id @default(cuid())
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  authorId     String
+  author       User     @relation("FeedbackAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  recipientId  String
+  recipient    User     @relation("FeedbackRecipient", fields: [recipientId], references: [id], onDelete: Restrict)
+  rating       Int
+  comment      String?
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
+
+  @@unique([eventId, authorId, recipientId])
+  @@index([recipientId, createdAt])
+}
+
+model AdminAction {
+  id          String          @id @default(cuid())
+  actorId     String
+  actor       User            @relation("AdminActionActor", fields: [actorId], references: [id], onDelete: Restrict)
+  action      AdminActionType
+  subjectType AdminSubjectType
+  subjectId   String
+  details     Json?
+  createdAt   DateTime        @default(now()) @db.Timestamptz(3)
+
+  @@index([subjectType, subjectId, createdAt])
+  @@index([actorId, createdAt])
+}

@@ -1,0 +1,36 @@
+$kind: http-example
+name: The requested resource was not found.
+request:
+  url: "{{baseUrl}}/api/organizers/me/events/:eventId/applications?status=WAITLISTED"
+  method: GET
+  headers:
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+    - key: Accept
+      value: application/json
+  queryParams:
+    status: WAITLISTED
+  pathVariables:
+    - key: eventId
+      value: string
+      disabled: false
+      description: "(Required) "
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 404
+  statusText: Not Found
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "error": {
+          "code": "string",
+          "message": "string"
+        }
+      }
+order: 2000

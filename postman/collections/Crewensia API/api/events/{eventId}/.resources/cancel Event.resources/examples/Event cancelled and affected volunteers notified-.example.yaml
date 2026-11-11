@@ -1,0 +1,29 @@
+$kind: http-example
+name: Event cancelled and affected volunteers notified.
+request:
+  url: "{{baseUrl}}/api/events/:eventId/cancel"
+  method: POST
+  headers:
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  pathVariables:
+    - key: eventId
+      value: string
+      disabled: false
+      description: "(Required) "
+  body:
+    type: json
+    content: |-
+      {
+        "reason": "string"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

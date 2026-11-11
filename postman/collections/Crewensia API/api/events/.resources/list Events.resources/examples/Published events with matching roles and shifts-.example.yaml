@@ -1,0 +1,23 @@
+$kind: http-example
+name: Published events with matching roles and shifts.
+request:
+  url: "{{baseUrl}}/api/events?city=string&role=string&skill=string&page=1&pageSize=20"
+  method: GET
+  queryParams:
+    city: string
+    role: string
+    skill: string
+    page: "1"
+    pageSize: "20"
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

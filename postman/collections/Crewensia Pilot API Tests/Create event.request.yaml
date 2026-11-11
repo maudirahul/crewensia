@@ -1,0 +1,57 @@
+$kind: http-request
+url: "{{baseUrl}}/api/events"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Postman Pilot Volunteer Event",
+      "description": "Temporary event created while exercising the Crewensia API.",
+      "venueName": "Test Hall",
+      "venueAddress": "1 Test Street",
+      "locality": "Test Locality",
+      "city": "Postman Test City",
+      "startsAt": "{{eventStartsAt}}",
+      "endsAt": "{{eventEndsAt}}",
+      "applicationDeadline": "{{deadline}}",
+      "category": "Community",
+      "eligibility": "Pilot API test participants.",
+      "benefits": "No real payment; test only.",
+      "roles": [
+        {
+          "title": "Event Helper",
+          "responsibilities": "Support event check-in.",
+          "requiredSkills": [
+            "first-aid",
+            "event-support"
+          ],
+          "compensationType": "UNPAID",
+          "shifts": [
+            {
+              "startsAt": "{{shiftOneStart}}",
+              "endsAt": "{{shiftOneEnd}}",
+              "openings": 2
+            },
+            {
+              "startsAt": "{{shiftTwoStart}}",
+              "endsAt": "{{shiftTwoEnd}}",
+              "openings": 2
+            }
+          ]
+        }
+      ]
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{organizerToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 201', function () { pm.response.to.have.status(201); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+      const e=pm.response.json().data; pm.collectionVariables.set('eventId',e.id); pm.collectionVariables.set('firstShiftId',e.roles[0].shifts[0].id); pm.collectionVariables.set('secondShiftId',e.roles[0].shifts[1].id);
+    language: text/javascript
+order: 17000

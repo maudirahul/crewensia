@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/signup"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Postman Organizer",
+      "email": "{{organizerEmail}}",
+      "password": "{{testPassword}}",
+      "initialRole": "ORGANIZER",
+      "phone": "+910000000001",
+      "organizationName": "Crewensia Postman Test Org",
+      "credentialType": "Pilot test credential",
+      "credentialDetails": "Temporary account created by the Crewensia Postman API collection."
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 201', function () { pm.response.to.have.status(201); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+      const j=pm.response.json().data; pm.collectionVariables.set('organizerToken',j.session.token);
+    language: text/javascript
+order: 2000

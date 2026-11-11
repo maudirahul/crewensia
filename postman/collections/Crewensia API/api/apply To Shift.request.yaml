@@ -1,0 +1,25 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/api/shifts/:shiftId/applications"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+pathVariables:
+  - key: shiftId
+    value: string
+    disabled: false
+    description: "(Required) "
+body:
+  type: json
+  content: |-
+    {
+      "message": "string"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+settings: {}
+examples: ./.resources/apply To Shift.resources/examples
+order: 7000

@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/events/{{eventId}}/publish"
+method: POST
+auth:
+  type: bearer
+  credentials:
+    token: "{{organizerToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 200', function () { pm.response.to.have.status(200); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+      pm.test('Event is published',()=>pm.expect(pm.response.json().data.status).to.eql('PUBLISHED'));
+    language: text/javascript
+order: 18000

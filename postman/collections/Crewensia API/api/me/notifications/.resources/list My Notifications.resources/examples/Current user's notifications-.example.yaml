@@ -1,0 +1,24 @@
+$kind: http-example
+name: Current user's notifications.
+request:
+  url: "{{baseUrl}}/api/me/notifications?page=1&pageSize=20"
+  method: GET
+  headers:
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  queryParams:
+    page: "1"
+    pageSize: "20"
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

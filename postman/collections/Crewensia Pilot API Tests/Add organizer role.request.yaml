@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/roles"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "role": "ORGANIZER",
+      "organizationName": "Secondary Postman Org",
+      "credentialType": "Local test",
+      "credentialDetails": "Created to test role switching."
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{volunteerToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 201', function () { pm.response.to.have.status(201); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+    language: text/javascript
+order: 13000

@@ -1,0 +1,14 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/api/me/notifications?page=1&pageSize=20"
+method: GET
+queryParams:
+  page: "1"
+  pageSize: "20"
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+settings: {}
+examples: ./.resources/list My Notifications.resources/examples
+order: 1000

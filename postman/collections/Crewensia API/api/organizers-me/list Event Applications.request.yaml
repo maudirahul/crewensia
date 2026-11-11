@@ -1,0 +1,20 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/api/organizers/me/events/:eventId/applications?status=WAITLISTED"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  status: WAITLISTED
+pathVariables:
+  - key: eventId
+    value: string
+    disabled: false
+    description: "(Required) "
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+settings: {}
+examples: ./.resources/list Event Applications.resources/examples
+order: 3000
