@@ -1,0 +1,468 @@
+openapi: 3.1.0
+info:
+  title: Crewensia API
+  version: 0.1.0
+  description: Pilot API for event staffing in Bhubaneswar.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/health:
+    get:
+      operationId: getHealth
+      responses:
+        '200':
+          description: API is available.
+  /api/auth/signup:
+    post:
+      operationId: signUp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
+      responses:
+        '201':
+          description: Account created and signed in.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/auth/login:
+    post:
+      operationId: logIn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 1, maxLength: 256 }
+      responses:
+        '200':
+          description: Signed-in session.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/auth/logout:
+    post:
+      operationId: logOut
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: Session revoked. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/me:
+    get:
+      operationId: getCurrentUser
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Current account and role profiles. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/me/profile:
+    patch:
+      operationId: updateCurrentProfile
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, maxLength: 120 }
+                phone: { type: string, maxLength: 40 }
+      responses:
+        '200': { description: Account profile updated. }
+  /api/me/volunteer-profile:
+    patch:
+      operationId: updateVolunteerProfile
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                homeCity: { type: string }
+                locality: { type: string }
+                skills: { type: array, maxItems: 50, items: { type: string, maxLength: 80 } }
+      responses:
+        '200': { description: Volunteer profile updated. }
+        '403': { description: Volunteer role required. }
+  /api/me/active-role:
+    patch:
+      operationId: switchActiveRole
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string, enum: [VOLUNTEER, ORGANIZER, ADMIN] }
+      responses:
+        '200': { description: Active interface role changed. }
+        '403': { description: Account does not have this role. }
+  /api/me/roles:
+    post:
+      operationId: addAccountRole
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string, enum: [VOLUNTEER, ORGANIZER] }
+                homeCity: { type: string }
+                organizationName: { type: string }
+                credentialType: { type: string }
+                credentialDetails: { type: string }
+      responses:
+        '201': { description: Role and corresponding profile created. }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/me/notifications:
+    get:
+      operationId: listMyNotifications
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+      responses:
+        '200': { description: Current user's notifications. }
+  /api/me/notifications/{notificationId}/read:
+    patch:
+      operationId: markNotificationRead
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: notificationId
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Notification marked read. }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/organizers/me:
+    get:
+      operationId: getOrganizerProfile
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Organizer profile and verification history. }
+  /api/organizers/me/verification-requests:
+    post:
+      operationId: submitOrganizerVerification
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [credentialType, credentialDetails]
+              properties:
+                credentialType: { type: string }
+                credentialDetails: { type: string }
+      responses:
+        '201': { description: Verification request submitted. }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/admin/organizer-verifications:
+    get:
+      operationId: listOrganizerVerifications
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string, enum: [PENDING, APPROVED, REJECTED, NEEDS_INFORMATION] }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+      responses:
+        '200': { description: Paginated verification requests. }
+        '403': { description: Admin access required. }
+  /api/admin/organizer-verifications/{requestId}:
+    patch:
+      operationId: reviewOrganizerVerification
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: requestId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision]
+              properties:
+                decision: { type: string, enum: [APPROVED, REJECTED, NEEDS_INFORMATION] }
+                notes: { type: string }
+      responses:
+        '200': { description: Verification request reviewed. }
+        '403': { description: Admin access required. }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/events:
+    get:
+      operationId: listEvents
+      parameters:
+        - in: query
+          name: city
+          schema: { type: string }
+        - in: query
+          name: role
+          schema: { type: string }
+        - in: query
+          name: skill
+          schema: { type: string }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+      responses:
+        '200': { description: Published events with matching roles and shifts. }
+    post:
+      operationId: createEvent
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        '201': { description: Draft event created. }
+        '403': { description: Approved organizer access required. }
+  /api/events/{eventId}:
+    get:
+      operationId: getEvent
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Event details. }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/events/{eventId}/publish:
+    post:
+      operationId: publishEvent
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Event published. }
+        '403': { description: Approved event owner required. }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/events/{eventId}/cancel:
+    post:
+      operationId: cancelEvent
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string, maxLength: 1000 }
+      responses:
+        '200': { description: Event cancelled and affected volunteers notified. }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/shifts/{shiftId}/applications:
+    post:
+      operationId: applyToShift
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: shiftId
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message: { type: string, maxLength: 1000 }
+      responses:
+        '201': { description: Application submitted. }
+        '403': { description: Volunteer access required. }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/me/applications:
+    get:
+      operationId: listMyApplications
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Current user's applications. }
+  /api/organizers/me/events/{eventId}/applications:
+    get:
+      operationId: listEventApplications
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: string }
+        - in: query
+          name: status
+          schema: { type: string, enum: [PENDING, APPROVED, REJECTED, WITHDRAWN, WAITLISTED, COMPLETED] }
+      responses:
+        '200': { description: Applicants for an organizer-owned event. }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/applications/{applicationId}:
+    patch:
+      operationId: decideApplication
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: applicationId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision]
+              properties:
+                decision: { type: string, enum: [APPROVED, REJECTED, WAITLISTED] }
+                note: { type: string, maxLength: 1000 }
+      responses:
+        '200': { description: Application decision recorded. }
+        '403': { description: Event owner access required. }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/applications/{applicationId}/withdraw:
+    post:
+      operationId: withdrawApplication
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: applicationId
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Application withdrawn. }
+        '403': { description: Volunteer role required. }
+        '409': { $ref: '#/components/responses/Conflict' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque session token
+  schemas:
+    SignUpRequest:
+      type: object
+      required: [name, email, password, initialRole]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 120 }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 12, maxLength: 256, description: Password is hashed with scrypt; whitespace is preserved. }
+        phone: { type: string }
+        locality: { type: string }
+        initialRole: { type: string, enum: [VOLUNTEER, ORGANIZER] }
+        homeCity: { type: string }
+        organizationName: { type: string }
+        credentialType: { type: string }
+        credentialDetails: { type: string }
+    CreateEventRequest:
+      type: object
+      required: [title, description, venueAddress, city, startsAt, endsAt, applicationDeadline, roles]
+      properties:
+        title: { type: string }
+        description: { type: string }
+        category: { type: string }
+        venueName: { type: string }
+        venueAddress: { type: string }
+        locality: { type: string }
+        city: { type: string }
+        latitude: { type: number }
+        longitude: { type: number }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+        applicationDeadline: { type: string, format: date-time }
+        eligibility: { type: string }
+        benefits: { type: string }
+        dressCode: { type: string }
+        arrivalInstructions: { type: string }
+        otherConditions: { type: string }
+        roles:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [title, responsibilities, compensationType, shifts]
+            properties:
+              title: { type: string }
+              responsibilities: { type: string }
+              requiredSkills: { type: array, items: { type: string } }
+              compensationType: { type: string, enum: [PAID, UNPAID] }
+              compensationAmount: { type: number, exclusiveMinimum: 0 }
+              compensationBasis: { type: string, enum: [PER_HOUR, PER_SHIFT, PER_EVENT] }
+              expectedPaymentAt: { type: string }
+              shifts:
+                type: array
+                minItems: 1
+                items:
+                  type: object
+                  required: [startsAt, endsAt, openings]
+                  properties:
+                    startsAt: { type: string, format: date-time }
+                    endsAt: { type: string, format: date-time }
+                    openings: { type: integer, minimum: 1 }
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+  responses:
+    BadRequest:
+      description: Request validation failed.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Authentication is required or the session is invalid.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: The requested resource was not found.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: Request conflicts with the resource's current state.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }

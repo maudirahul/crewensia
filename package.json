@@ -1,0 +1,25 @@
+{
+  "name": "crewensia",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n client,server \"npm:dev:client\" \"npm:dev:server\"",
+    "dev:client": "npm run dev --workspace @crewensia/client",
+    "dev:server": "npm run dev --workspace @crewensia/server",
+    "build": "npm run build --workspace @crewensia/client",
+    "db:generate": "npm run db:generate --workspace @crewensia/server",
+    "db:migrate": "npm run db:migrate --workspace @crewensia/server",
+    "db:deploy": "npm run db:deploy --workspace @crewensia/server",
+    "db:studio": "npm run db:studio --workspace @crewensia/server",
+    "admin:promote": "npm run admin:promote --workspace @crewensia/server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}

@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/profile"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Postman Volunteer Updated",
+      "phone": "+910000000003"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{volunteerToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 200', function () { pm.response.to.have.status(200); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+    language: text/javascript
+order: 11000

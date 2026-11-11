@@ -1,0 +1,56 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/api/events"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "string",
+      "description": "string",
+      "venueAddress": "string",
+      "city": "string",
+      "startsAt": "1948-04-09T04:31:57.429Z",
+      "endsAt": "1998-08-11T18:17:26.166Z",
+      "applicationDeadline": "1990-07-19T08:26:29.150Z",
+      "roles": [
+        {
+          "title": "string",
+          "responsibilities": "string",
+          "compensationType": "UNPAID",
+          "shifts": [
+            {
+              "startsAt": "2012-11-13T16:29:54.324Z",
+              "endsAt": "1951-09-02T09:21:16.023Z",
+              "openings": 2142
+            }
+          ],
+          "requiredSkills": [
+            "string",
+            "string"
+          ],
+          "compensationAmount": 2381.203501819866,
+          "compensationBasis": "PER_SHIFT",
+          "expectedPaymentAt": "string"
+        }
+      ],
+      "category": "string",
+      "venueName": "string",
+      "locality": "string",
+      "latitude": 362.6512479968369,
+      "longitude": 7262.31980137527,
+      "eligibility": "string",
+      "benefits": "string",
+      "dressCode": "string",
+      "arrivalInstructions": "string",
+      "otherConditions": "string"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+settings: {}
+examples: ./.resources/create Event.resources/examples
+order: 2000

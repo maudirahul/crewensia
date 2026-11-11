@@ -1,0 +1,30 @@
+$kind: collection
+id: ef44080f-1a99-4c38-b729-e6a7fa000001
+description: Stateful end-to-end Postman checks for all implemented Crewensia pilot API operations. Creates temporary accounts and an event; clean up test data after a run.
+variables:
+  baseUrl: http://localhost:3000
+  organizerToken: ""
+  volunteerToken: ""
+  adminToken: ""
+  organizerEmail: ""
+  volunteerEmail: ""
+  verificationId: ""
+  eventId: ""
+  firstShiftId: ""
+  secondShiftId: ""
+  applicationId: ""
+  withdrawApplicationId: ""
+  notificationId: ""
+  eventStartsAt: ""
+  eventEndsAt: ""
+  deadline: ""
+  shiftOneStart: ""
+  shiftOneEnd: ""
+  shiftTwoStart: ""
+  shiftTwoEnd: ""
+auth:
+  - id: 7b33eb13-1650-4fe0-b24b-81b30be8db38
+    type: bearer
+    name: bearer auth
+    credentials:
+      token: "{{organizerToken}}"

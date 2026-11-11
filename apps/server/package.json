@@ -1,0 +1,28 @@
+{
+  "name": "@crewensia/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --env-file=../../.env src/server.js",
+    "start": "node --env-file=../../.env src/server.js",
+    "start:container": "node src/server.js",
+    "db:generate": "prisma generate --config prisma.config.js",
+    "db:migrate": "prisma migrate dev --config prisma.config.js",
+    "db:deploy": "prisma migrate deploy --config prisma.config.js",
+    "db:studio": "prisma studio --config prisma.config.js",
+    "admin:promote": "node --env-file=../../.env scripts/promote-admin.js",
+    "db:seed-demo": "node --env-file=../../.env scripts/seed-demo.js"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.0.0",
+    "@prisma/client": "^7.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "pg": "^8.16.0"
+  },
+  "devDependencies": {
+    "prisma": "^7.0.0"
+  }
+}

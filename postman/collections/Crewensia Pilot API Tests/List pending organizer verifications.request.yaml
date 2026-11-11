@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{baseUrl}}/api/admin/organizer-verifications?status=PENDING"
+method: GET
+queryParams:
+  - key: status
+    value: PENDING
+auth:
+  type: bearer
+  credentials:
+    token: "{{adminToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 200', function () { pm.response.to.have.status(200); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+      const j=pm.response.json(); const email=pm.collectionVariables.get('organizerEmail'); const item=j.data.find(x=>x.organizer.user.email===email); pm.test('New organizer verification is listed',()=>pm.expect(item).to.exist); if(item) pm.collectionVariables.set('verificationId',item.id);
+    language: text/javascript
+order: 7000

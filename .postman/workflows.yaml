@@ -1,0 +1,4 @@
+workflows:
+  syncSpecToCollection:
+    - spec: ../apps/server/openapi.yaml
+      collection: ../postman/collections/Crewensia API

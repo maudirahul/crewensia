@@ -1,0 +1,18 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/api/events/:eventId/publish"
+method: POST
+headers:
+  Accept: application/json
+pathVariables:
+  - key: eventId
+    value: string
+    disabled: false
+    description: "(Required) "
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+settings: {}
+examples: ./.resources/publish Event.resources/examples
+order: 2000

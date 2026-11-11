@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/organizers/me/verification-requests"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "credentialType": "Pilot test credential",
+      "credentialDetails": "Already approved."
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{organizerToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 409', function () { pm.response.to.have.status(409); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+    language: text/javascript
+order: 10000

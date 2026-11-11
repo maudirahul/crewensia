@@ -1,0 +1,27 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/volunteer-profile"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "homeCity": "Postman Test City",
+      "locality": "Updated Locality",
+      "skills": [
+        "first-aid",
+        "event-support"
+      ]
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{volunteerToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 200', function () { pm.response.to.have.status(200); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+    language: text/javascript
+order: 12000

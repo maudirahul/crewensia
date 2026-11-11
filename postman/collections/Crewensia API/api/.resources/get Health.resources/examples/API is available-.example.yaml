@@ -1,0 +1,17 @@
+$kind: http-example
+name: API is available.
+request:
+  url: "{{baseUrl}}/api/health"
+  method: GET
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

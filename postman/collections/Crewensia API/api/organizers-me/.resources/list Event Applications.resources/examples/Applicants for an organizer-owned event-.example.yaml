@@ -1,0 +1,28 @@
+$kind: http-example
+name: Applicants for an organizer-owned event.
+request:
+  url: "{{baseUrl}}/api/organizers/me/events/:eventId/applications?status=WAITLISTED"
+  method: GET
+  headers:
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  queryParams:
+    status: WAITLISTED
+  pathVariables:
+    - key: eventId
+      value: string
+      disabled: false
+      description: "(Required) "
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

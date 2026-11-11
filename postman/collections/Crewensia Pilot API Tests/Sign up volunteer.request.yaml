@@ -1,0 +1,27 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/signup"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Postman Volunteer",
+      "email": "{{volunteerEmail}}",
+      "password": "{{testPassword}}",
+      "initialRole": "VOLUNTEER",
+      "phone": "+910000000002",
+      "homeCity": "Postman Test City",
+      "locality": "Test Locality"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 201', function () { pm.response.to.have.status(201); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+      const j=pm.response.json().data; pm.collectionVariables.set('volunteerToken',j.session.token);
+    language: text/javascript
+order: 3000

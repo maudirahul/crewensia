@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/api/admin/organizer-verifications/{{verificationId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "decision": "APPROVED",
+      "notes": "Approved for the local pilot API test."
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{adminToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 200', function () { pm.response.to.have.status(200); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+      pm.test('Verification approved',()=>pm.expect(pm.response.json().data.status).to.eql('APPROVED'));
+    language: text/javascript
+order: 8000

@@ -1,0 +1,30 @@
+$kind: http-example
+name: The requested resource was not found.
+request:
+  url: "{{baseUrl}}/api/events/:eventId"
+  method: GET
+  headers:
+    Accept: application/json
+  pathVariables:
+    - key: eventId
+      value: string
+      disabled: false
+      description: "(Required) "
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 404
+  statusText: Not Found
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "error": {
+          "code": "string",
+          "message": "string"
+        }
+      }
+order: 2000

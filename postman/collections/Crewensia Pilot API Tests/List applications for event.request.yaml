@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{baseUrl}}/api/organizers/me/events/{{eventId}}/applications?status=PENDING"
+method: GET
+queryParams:
+  - key: status
+    value: PENDING
+auth:
+  type: bearer
+  credentials:
+    token: "{{organizerToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 200', function () { pm.response.to.have.status(200); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+      const rows=pm.response.json().data; pm.test('Volunteer application is listed',()=>pm.expect(rows.some(a=>a.id===pm.collectionVariables.get('applicationId'))).to.eql(true));
+    language: text/javascript
+order: 22000

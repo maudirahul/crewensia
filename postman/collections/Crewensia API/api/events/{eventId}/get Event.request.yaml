@@ -1,0 +1,14 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/api/events/:eventId"
+method: GET
+headers:
+  Accept: application/json
+pathVariables:
+  - key: eventId
+    value: string
+    disabled: false
+    description: "(Required) "
+settings: {}
+examples: ./.resources/get Event.resources/examples
+order: 1000

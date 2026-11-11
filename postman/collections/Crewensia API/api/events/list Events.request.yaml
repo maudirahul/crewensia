@@ -1,0 +1,13 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/api/events?city=string&role=string&skill=string&page=1&pageSize=20"
+method: GET
+queryParams:
+  city: string
+  role: string
+  skill: string
+  page: "1"
+  pageSize: "20"
+settings: {}
+examples: ./.resources/list Events.resources/examples
+order: 1000

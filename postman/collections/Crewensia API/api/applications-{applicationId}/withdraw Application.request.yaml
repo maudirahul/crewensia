@@ -1,0 +1,18 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/api/applications/:applicationId/withdraw"
+method: POST
+headers:
+  Accept: application/json
+pathVariables:
+  - key: applicationId
+    value: string
+    disabled: false
+    description: "(Required) "
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+settings: {}
+examples: ./.resources/withdraw Application.resources/examples
+order: 2000

@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/api/events/{{eventId}}"
+method: GET
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 200', function () { pm.response.to.have.status(200); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+    language: text/javascript
+order: 20000

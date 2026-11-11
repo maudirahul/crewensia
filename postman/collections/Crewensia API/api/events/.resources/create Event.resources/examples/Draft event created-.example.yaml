@@ -1,0 +1,61 @@
+$kind: http-example
+name: Draft event created.
+request:
+  url: "{{baseUrl}}/api/events"
+  method: POST
+  headers:
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "title": "string",
+        "description": "string",
+        "venueAddress": "string",
+        "city": "string",
+        "startsAt": "1984-07-23T16:28:25.374Z",
+        "endsAt": "2017-06-15T09:29:08.575Z",
+        "applicationDeadline": "1994-04-04T20:59:53.932Z",
+        "roles": [
+          {
+            "title": "string",
+            "responsibilities": "string",
+            "compensationType": "UNPAID",
+            "shifts": [
+              {
+                "startsAt": "1957-06-25T01:15:53.876Z",
+                "endsAt": "1991-05-21T19:05:53.538Z",
+                "openings": 4033
+              }
+            ],
+            "requiredSkills": [
+              "string",
+              "string"
+            ],
+            "compensationAmount": 7438.405618639663,
+            "compensationBasis": "PER_HOUR",
+            "expectedPaymentAt": "string"
+          }
+        ],
+        "category": "string",
+        "venueName": "string",
+        "locality": "string",
+        "latitude": 5872.773153241724,
+        "longitude": 6222.002392169088,
+        "eligibility": "string",
+        "benefits": "string",
+        "dressCode": "string",
+        "arrivalInstructions": "string",
+        "otherConditions": "string"
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

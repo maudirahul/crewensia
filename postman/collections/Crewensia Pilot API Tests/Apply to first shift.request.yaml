@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/shifts/{{firstShiftId}}/applications"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "message": "I can help with event check-in."
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{volunteerToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 201', function () { pm.response.to.have.status(201); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+      pm.collectionVariables.set('applicationId',pm.response.json().data.id);
+    language: text/javascript
+order: 21000

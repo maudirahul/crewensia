@@ -1,0 +1,37 @@
+$kind: http-example
+name: Request validation failed.
+request:
+  url: "{{baseUrl}}/api/auth/signup"
+  method: POST
+  headers:
+    Accept: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "name": "string",
+        "email": "dyOLgnSqNR47-lK@jHXPcqtmrPKCkkDlaO.jr",
+        "password": "stringstring",
+        "initialRole": "VOLUNTEER",
+        "phone": "string",
+        "locality": "string",
+        "homeCity": "string",
+        "organizationName": "string",
+        "credentialType": "string",
+        "credentialDetails": "string"
+      }
+response:
+  statusCode: 400
+  statusText: Bad Request
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "error": {
+          "code": "string",
+          "message": "string"
+        }
+      }
+order: 2000

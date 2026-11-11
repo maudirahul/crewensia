@@ -1,0 +1,14 @@
+$kind: http-request
+description: ""
+url: "{{baseUrl}}/api/admin/organizer-verifications?status=APPROVED&page=1"
+method: GET
+queryParams:
+  status: APPROVED
+  page: "1"
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+settings: {}
+examples: ./.resources/list Organizer Verifications.resources/examples
+order: 1000

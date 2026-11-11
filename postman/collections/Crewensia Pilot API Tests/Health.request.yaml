@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{baseUrl}}/api/health"
+method: GET
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 200', function () { pm.response.to.have.status(200); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+      pm.test('Health status is ok',()=>pm.expect(pm.response.json().status).to.eql('ok'));
+      const id=Date.now().toString();
+      pm.collectionVariables.set('organizerEmail','crewensia-org-'+id+'@example.test');
+      pm.collectionVariables.set('volunteerEmail','crewensia-vol-'+id+'@example.test');
+      const start=new Date(Date.now()+14*86400000); start.setUTCHours(9,0,0,0);
+      const end=new Date(start.getTime()+9*3600000);
+      const deadline=new Date(start.getTime()-7*86400000);
+      pm.collectionVariables.set('eventStartsAt',start.toISOString());
+      pm.collectionVariables.set('eventEndsAt',end.toISOString());
+      pm.collectionVariables.set('deadline',deadline.toISOString());
+      pm.collectionVariables.set('shiftOneStart',start.toISOString());
+      pm.collectionVariables.set('shiftOneEnd',new Date(start.getTime()+4*3600000).toISOString());
+      pm.collectionVariables.set('shiftTwoStart',new Date(start.getTime()+5*3600000).toISOString());
+      pm.collectionVariables.set('shiftTwoEnd',end.toISOString());
+    language: text/javascript
+order: 1000

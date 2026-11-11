@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/me/applications"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{volunteerToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 200', function () { pm.response.to.have.status(200); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+      const rows=pm.response.json().data; pm.test('Application appears in volunteer history',()=>pm.expect(rows.some(a=>a.id===pm.collectionVariables.get('applicationId'))).to.eql(true));
+    language: text/javascript
+order: 24000

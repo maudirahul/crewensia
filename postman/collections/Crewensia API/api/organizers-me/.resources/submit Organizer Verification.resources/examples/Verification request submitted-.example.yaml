@@ -1,0 +1,25 @@
+$kind: http-example
+name: Verification request submitted.
+request:
+  url: "{{baseUrl}}/api/organizers/me/verification-requests"
+  method: POST
+  headers:
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "credentialType": "string",
+        "credentialDetails": "string"
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

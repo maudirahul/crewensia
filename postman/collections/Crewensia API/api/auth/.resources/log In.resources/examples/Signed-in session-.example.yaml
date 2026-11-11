@@ -1,0 +1,21 @@
+$kind: http-example
+name: Signed-in session.
+request:
+  url: "{{baseUrl}}/api/auth/login"
+  method: POST
+  body:
+    type: json
+    content: |-
+      {
+        "email": "Cth2B@nZueCGiprDRnXqGSIffoGMFFcHNscc.sxc",
+        "password": "string"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: text/plain
+  body:
+    type: text
+    content: ""
+order: 1000

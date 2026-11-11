@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/shifts/{{secondShiftId}}/applications"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "message": "Second-shift withdrawal flow."
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{volunteerToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('HTTP 201', function () { pm.response.to.have.status(201); });
+      pm.test('Response is valid JSON', function () { pm.response.to.be.json; });
+      pm.collectionVariables.set('withdrawApplicationId',pm.response.json().data.id);
+    language: text/javascript
+order: 27000
