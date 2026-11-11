@@ -10,8 +10,9 @@ import { organizersRouter } from './routes/organizers.routes.js';
 
 export const app = express();
 const clientOrigins = (process.env.CLIENT_ORIGIN ?? 'http://localhost:5173').split(',').map((origin) => origin.trim()).filter(Boolean);
+const allowedOrigins = new Set([...clientOrigins, 'https://client-gamma-one-36.vercel.app']);
 
-app.use(cors({ origin: clientOrigins.length === 1 ? clientOrigins[0] : clientOrigins }));
+app.use(cors({ origin: (origin, callback) => callback(null, !origin || allowedOrigins.has(origin)) }));
 app.use(express.json({ limit: '1mb' }));
 
 app.get('/api/health', (_request, response) => {
