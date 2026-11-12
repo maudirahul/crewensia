@@ -1,18 +1,21 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, ClipboardCheck, Clock3, RotateCcw, X } from 'lucide-react';
+import { CalendarDays, Check, ClipboardCheck, Clock3, MapPin, RotateCcw, Users, X } from 'lucide-react';
 import { SiteHeader } from '../components/SiteHeader';
 import { Button } from '../components/Button';
 import { EmptyState, ErrorMessage, LoadingMessage } from '../components/StatusMessage';
 import { getApiError } from '../lib/api';
-import { formatDate } from '../lib/format';
+import { formatDate, formatTime, getEventLocation } from '../lib/format';
 import { adminApi } from '../features/admin/adminApi';
 
 export function AdminHomePage() {
   const [notes, setNotes] = useState({});
   const [notice, setNotice] = useState(null);
+  const [eventStatus, setEventStatus] = useState('ALL');
+  const [eventsPage, setEventsPage] = useState(1);
   const queryClient = useQueryClient();
   const query = useQuery({ queryKey: ['admin', 'organizer-verifications'], queryFn: () => adminApi.getOrganizerVerifications({ status: 'PENDING', pageSize: 50 }) });
+  const eventsQuery = useQuery({ queryKey: ['admin', 'events', eventStatus, eventsPage], queryFn: () => adminApi.getEvents({ status: eventStatus, page: eventsPage, pageSize: 10 }) });
   const review = useMutation({
     mutationFn: ({ requestId, decision }) => adminApi.reviewOrganizer(requestId, { decision, notes: notes[requestId] || undefined }),
     onSuccess: (_data, variables) => {
@@ -23,7 +26,7 @@ export function AdminHomePage() {
   });
 
   return <div className="site-page"><SiteHeader app /><main className="container dashboard-main admin-main">
-    <section className="dashboard-welcome admin-welcome"><div><span className="section-kicker">CREWENSIA ADMIN</span><h1>Organizer review</h1><p>Check submitted credentials and approve organizations before they publish events.</p></div><span className="dashboard-welcome-mark"><ClipboardCheck /></span></section>
+    <section className="dashboard-welcome admin-welcome"><div><span className="section-kicker">CREWENSIA ADMIN</span><h1>Admin panel</h1><p>Review organizers, track every event, and see who has applied to each role.</p></div><span className="dashboard-welcome-mark"><ClipboardCheck /></span></section>
     {notice && <div className={`admin-notice admin-notice-${notice.type}`} role="status">{notice.message}<button onClick={() => setNotice(null)} aria-label="Dismiss">×</button></div>}
     <div className="admin-section-head"><div><span className="section-kicker">ONBOARDING QUEUE</span><h2>Pending verification requests</h2></div><Button variant="secondary" size="sm" onClick={() => query.refetch()}><RotateCcw size={14} /> Refresh</Button></div>
     {query.isLoading ? <LoadingMessage label="Loading verification requests…" /> : query.isError ? <ErrorMessage message={getApiError(query.error, 'Could not load organizer requests.')} /> : query.data?.data?.length ? <div className="admin-request-list">{query.data.data.map((item) => <article className="admin-request-card" key={item.id}>
@@ -32,5 +35,23 @@ export function AdminHomePage() {
       <label className="admin-notes-field">Review notes<textarea value={notes[item.id] || ''} onChange={(event) => setNotes((current) => ({ ...current, [item.id]: event.target.value }))} placeholder="Optional for approval; required when requesting changes or rejecting" /></label>
       <div className="admin-review-actions"><Button size="sm" loading={review.isPending && review.variables?.requestId === item.id && review.variables?.decision === 'APPROVED'} onClick={() => review.mutate({ requestId: item.id, decision: 'APPROVED' })}><Check size={14} /> Approve organizer</Button><Button variant="secondary" size="sm" disabled={review.isPending && review.variables?.requestId === item.id} onClick={() => review.mutate({ requestId: item.id, decision: 'NEEDS_INFORMATION' })}><RotateCcw size={14} /> Request details</Button><Button variant="quiet" size="sm" disabled={review.isPending && review.variables?.requestId === item.id} onClick={() => review.mutate({ requestId: item.id, decision: 'REJECTED' })}><X size={14} /> Reject</Button></div>
     </article>)}</div> : <EmptyState icon={Check} title="All caught up">There are no pending organizer verification requests.</EmptyState>}
+
+    <section className="admin-events-section" aria-labelledby="admin-events-title">
+      <div className="admin-section-head"><div><span className="section-kicker">EVENT OVERSIGHT</span><h2 id="admin-events-title">Events and applicants</h2><p className="admin-events-caption">{eventsQuery.data?.pagination?.total ?? 'All'} events · organizer, event details, roles, shifts, and applications</p></div><div className="admin-events-tools"><label className="admin-filter-label" htmlFor="admin-event-status">Status</label><select id="admin-event-status" className="admin-event-status" value={eventStatus} onChange={(event) => { setEventStatus(event.target.value); setEventsPage(1); }}><option value="ALL">All events</option><option value="PUBLISHED">Active / published</option><option value="DRAFT">Draft</option><option value="CANCELLED">Cancelled</option><option value="COMPLETED">Completed</option><option value="HIDDEN">Hidden</option></select><Button variant="secondary" size="sm" onClick={() => eventsQuery.refetch()}><RotateCcw size={14} /> Refresh</Button></div></div>
+      {eventsQuery.isLoading ? <LoadingMessage label="Loading events and applications…" /> : eventsQuery.isError ? <ErrorMessage message={getApiError(eventsQuery.error, 'Could not load events.')} /> : eventsQuery.data?.data?.length ? <div className="admin-event-list">{eventsQuery.data.data.map((event) => {
+        const applications = event.roles.flatMap((role) => role.shifts.flatMap((shift) => shift.applications.map((application) => ({ ...application, roleTitle: role.title, shift }))));
+        return <article className="admin-event-card" key={event.id}>
+          <div className="admin-event-top"><div><span className={`admin-event-status-tag status-${event.status.toLowerCase()}`}>{event.status.replaceAll('_', ' ')}</span><h3>{event.title}</h3><p className="admin-event-organizer">Posted by <strong>{event.organizer.organizationName || event.organizer.user.name}</strong>{' · '}{event.organizer.user.name}{' · '}<a href={`mailto:${event.organizer.user.email}`}>{event.organizer.user.email}</a>{event.organizer.user.phone && <> · <a href={`tel:${event.organizer.user.phone}`}>{event.organizer.user.phone}</a></>}</p></div><div className="admin-event-count"><Users size={16} /> {applications.length} {applications.length === 1 ? 'application' : 'applications'}</div></div>
+          <div className="admin-event-meta"><span><CalendarDays size={15} />{formatDate(event.startsAt)} · {formatTime(event.startsAt)}–{formatTime(event.endsAt)}</span><span><MapPin size={15} />{getEventLocation(event)}{event.venueName ? ` · ${event.venueName}` : ''}</span><span>Apply by {formatDate(event.applicationDeadline)}</span><span>Posted {formatDate(event.createdAt)}</span></div>
+          <p className="admin-event-description">{event.description}</p>
+          <dl className="admin-event-facts"><div><dt>Category</dt><dd>{event.category || 'Not specified'}</dd></div><div><dt>Venue address</dt><dd>{event.venueAddress}</dd></div><div><dt>Organizer verification</dt><dd>{event.organizer.verificationStatus.replaceAll('_', ' ')}</dd></div><div><dt>Published</dt><dd>{event.publishedAt ? formatDate(event.publishedAt) : 'Not published'}</dd></div>{event.eligibility && <div><dt>Eligibility</dt><dd>{event.eligibility}</dd></div>}{event.benefits && <div><dt>Benefits</dt><dd>{event.benefits}</dd></div>}{event.dressCode && <div><dt>Dress code</dt><dd>{event.dressCode}</dd></div>}{event.arrivalInstructions && <div><dt>Arrival instructions</dt><dd>{event.arrivalInstructions}</dd></div>}{event.otherConditions && <div><dt>Other conditions</dt><dd>{event.otherConditions}</dd></div>}{event.cancellationReason && <div><dt>Cancellation reason</dt><dd>{event.cancellationReason}</dd></div>}</dl>
+          <div className="admin-event-roles"><h4>Roles, shifts, and applicants</h4>{event.roles.length ? event.roles.map((role) => <section className="admin-role-block" key={role.id}><div className="admin-role-heading"><div><strong>{role.title}</strong><p>{role.responsibilities}</p>{role.requiredSkills.length > 0 && <small>Skills: {role.requiredSkills.join(', ')}</small>}</div><span>{role.compensationType === 'PAID' ? `₹${Number(role.compensationAmount).toLocaleString('en-IN')} ${({ PER_HOUR: '/ hour', PER_SHIFT: '/ shift', PER_EVENT: '/ event' })[role.compensationBasis] || ''}${role.expectedPaymentAt ? ` · ${role.expectedPaymentAt}` : ''}` : 'Unpaid / volunteer'}</span></div>{role.shifts.map((shift) => {
+            const shiftApplications = shift.applications;
+            return <div className="admin-shift-block" key={shift.id}><div className="admin-shift-heading"><span>{formatDate(shift.startsAt)} · {formatTime(shift.startsAt)}–{formatTime(shift.endsAt)}</span><span>{shift.openings} openings · {shiftApplications.length} applied</span></div>{shiftApplications.length ? <div className="admin-applicant-list">{shiftApplications.map((application) => <div className="admin-applicant-row" key={application.id}><div><strong>{application.volunteer.name}</strong><span><a href={`mailto:${application.volunteer.email}`}>{application.volunteer.email}</a>{application.volunteer.phone && <> · <a href={`tel:${application.volunteer.phone}`}>{application.volunteer.phone}</a></>}{application.volunteer.volunteerProfile && <> · {[application.volunteer.volunteerProfile.locality, application.volunteer.volunteerProfile.homeCity].filter(Boolean).join(', ')}</>}</span>{application.volunteer.volunteerProfile?.skills?.length > 0 && <small>Skills: {application.volunteer.volunteerProfile.skills.join(', ')}</small>}{application.message && <p>{application.message}</p>}</div><div className="admin-applicant-status"><span className={`status-label status-${application.status.toLowerCase()}`}>{application.status.replaceAll('_', ' ')}</span><small>Applied {formatDate(application.appliedAt)}</small></div></div>)}</div> : <p className="admin-no-applications">No applications for this shift yet.</p>}</div>;
+          })}</section>) : <p className="admin-no-applications">No roles have been added to this event.</p>}</div>
+        </article>;
+      })}</div> : <EmptyState icon={CalendarDays} title="No events found">There are no events matching this status.</EmptyState>}
+      {eventsQuery.data?.pagination?.total > 10 && <div className="admin-event-pagination"><span>Page {eventsPage} of {Math.ceil(eventsQuery.data.pagination.total / 10)}</span><div><Button variant="secondary" size="sm" disabled={eventsPage <= 1} onClick={() => setEventsPage((page) => page - 1)}>Previous</Button><Button variant="secondary" size="sm" disabled={eventsPage >= Math.ceil(eventsQuery.data.pagination.total / 10)} onClick={() => setEventsPage((page) => page + 1)}>Next</Button></div></div>}
+    </section>
   </main></div>;
 }

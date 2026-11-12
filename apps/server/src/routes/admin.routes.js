@@ -6,6 +6,59 @@ import { asyncRoute, HttpError, optionalString, pagination, requiredString, requ
 export const adminRouter = Router();
 adminRouter.use(authenticate(), requireRole('ADMIN'));
 
+adminRouter.get('/events', asyncRoute(async (request, response) => {
+  const { page, pageSize, skip, take } = pagination(request.query);
+  const status = request.query.status ?? 'ALL';
+  const allowedStatuses = ['ALL', 'DRAFT', 'PUBLISHED', 'CANCELLED', 'COMPLETED', 'HIDDEN'];
+  if (!allowedStatuses.includes(status)) {
+    throw new HttpError(400, 'VALIDATION_ERROR', 'status is not a valid event status.');
+  }
+  const where = status === 'ALL' ? {} : { status };
+  const [items, total] = await prisma.$transaction([
+    prisma.event.findMany({
+      where,
+      orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+      skip,
+      take,
+      include: {
+        organizer: {
+          select: {
+            organizationName: true,
+            verificationStatus: true,
+            user: { select: { id: true, name: true, email: true, phone: true } },
+          },
+        },
+        roles: {
+          orderBy: { createdAt: 'asc' },
+          include: {
+            shifts: {
+              orderBy: { startsAt: 'asc' },
+              include: {
+                applications: {
+                  orderBy: { appliedAt: 'desc' },
+                  include: {
+                    volunteer: {
+                      select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phone: true,
+                        volunteerProfile: { select: { homeCity: true, locality: true, skills: true } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+    prisma.event.count({ where }),
+  ]);
+  response.json({ data: items, pagination: { page, pageSize, total } });
+}));
+
 adminRouter.get('/organizer-verifications', asyncRoute(async (request, response) => {
   const { page, pageSize, skip, take } = pagination(request.query);
   const status = request.query.status ?? 'PENDING';
