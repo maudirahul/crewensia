@@ -134,7 +134,7 @@ Compose starts PostgreSQL, builds and starts the API, applies pending Prisma mig
 
 ### Demo data and accounts
 
-Run `npm run db:seed-demo --workspace @crewensia/server` to create or refresh local demo accounts, organizer verification data, and a published event. Every account uses the password `CrewensiaDemo2026!`:
+Run `npm run db:seed-demo --workspace @crewensia/server` to create or refresh local demo accounts, organizer verification data, and a published event. These credentials are for the local development database only; the production test accounts have separate passwords shared directly with the project owner:
 
 | Name | Role and status | Email | Phone | Password |
 | --- | --- | --- | --- | --- |
@@ -162,11 +162,11 @@ Run `npm run db:seed-demo --workspace @crewensia/server` to create or refresh lo
 - **Arrival:** meet at the garden entrance beside the community library and ask for Maya
 - **Sample application:** Aarav Volunteer is seeded as a pending applicant, so Maya can open the organizer studio and test viewing contact details and accepting or rejecting an application.
 
-The location dropdown currently offers **Bhubaneswar** for the pilot. Sign in as `demo.admin@crewensia.test` and open `/admin` to review the pending organization. As the volunteer, open `/events` to see the garden event. Demo names, contact details, credentials, and login data are for local development only.
+The location dropdown currently offers **Bhubaneswar** for the pilot. Sign in as `demo.admin@crewensia.test` and open `/admin` to review the pending organization. As the volunteer, open `/events` to see the garden event. Demo names, contact details, credentials, and login data in this section are for local development only.
 
 #### Production review sample data
 
-The separate production review seeder creates clearly labeled fictional records for the admin panel: one `DEMO ONLY — Community Garden Day (do not attend)` listing and three sample volunteer applications in pending, approved, and waitlisted states. Demo account emails use the reserved `.test` domain, have no phone numbers, and receive random unusable password hashes; the script does not create an admin account or update existing records. The event has no real venue and explicitly tells visitors not to attend. Run it only as a Render one-off job with `NODE_ENV=production CREWENSIA_ENABLE_PRODUCTION_DEMO_SEED=true npm run db:seed-production-demo --workspace @crewensia/server`.
+The production database has login-enabled test accounts for an admin, a volunteer, an approved organizer, and a pending organizer. They use the addresses `demo.admin@crewensia.test`, `demo.volunteer@crewensia.test`, `demo.organizer@crewensia.test`, and `demo.pending@crewensia.test`; their production passwords are shared privately with the project owner and are not stored in this public repository. A separate production review seeder creates clearly labeled fictional records for the admin panel: one `DEMO ONLY — Community Garden Day (do not attend)` listing and three sample volunteer applications in pending, approved, and waitlisted states. The sample applicant accounts created by that script have random unusable password hashes. The event has no real venue and explicitly tells visitors not to attend. Run it only as a Render one-off job with `NODE_ENV=production CREWENSIA_ENABLE_PRODUCTION_DEMO_SEED=true npm run db:seed-production-demo --workspace @crewensia/server`.
 
 You no longer need to start the client, API, or Prisma migrations separately for the Docker workflow. The existing individual npm commands remain available for development outside Docker.
 

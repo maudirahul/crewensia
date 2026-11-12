@@ -6,13 +6,16 @@ if (process.env.NODE_ENV !== 'production' || process.env.CREWENSIA_ENABLE_PRODUC
   throw new Error('Production demo seed is disabled. Set NODE_ENV=production and CREWENSIA_ENABLE_PRODUCTION_DEMO_SEED=true to run it.');
 }
 
-const organizationName = 'Crewensia demo data (fictional)';
+const organizationName = 'Community Table Bhubaneswar';
 const eventTitle = 'DEMO ONLY — Community Garden Day (do not attend)';
 
 async function findOrCreateDemoUser(tx, { email, name, roles, activeRole }) {
   const existing = await tx.user.findUnique({ where: { email } });
   if (existing) {
-    if (existing.name !== name || !existing.roles.includes(activeRole) || !email.endsWith('@crewensia.test')) {
+    const acceptedNames = email === 'demo.organizer@crewensia.test'
+      ? new Set(['Maya Rao', 'Crewensia Demo Organizer'])
+      : new Set([name]);
+    if (!acceptedNames.has(existing.name) || !existing.roles.includes(activeRole) || !email.endsWith('@crewensia.test')) {
       throw new Error(`Refusing to modify existing account ${email}.`);
     }
     return existing;
@@ -42,7 +45,7 @@ try {
   const result = await prisma.$transaction(async (tx) => {
     const organizerUser = await findOrCreateDemoUser(tx, {
       email: 'demo.organizer@crewensia.test',
-      name: 'Crewensia Demo Organizer',
+      name: 'Maya Rao',
       roles: ['ORGANIZER'],
       activeRole: 'ORGANIZER',
     });
