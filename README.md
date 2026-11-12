@@ -164,6 +164,10 @@ Run `npm run db:seed-demo --workspace @crewensia/server` to create or refresh lo
 
 The location dropdown currently offers **Bhubaneswar** for the pilot. Sign in as `demo.admin@crewensia.test` and open `/admin` to review the pending organization. As the volunteer, open `/events` to see the garden event. Demo names, contact details, credentials, and login data are for local development only.
 
+#### Production review sample data
+
+The separate production review seeder creates clearly labeled fictional records for the admin panel: one `DEMO ONLY — Community Garden Day (do not attend)` listing and three sample volunteer applications in pending, approved, and waitlisted states. Demo account emails use the reserved `.test` domain, have no phone numbers, and receive random unusable password hashes; the script does not create an admin account or update existing records. The event has no real venue and explicitly tells visitors not to attend. Run it only as a Render one-off job with `NODE_ENV=production CREWENSIA_ENABLE_PRODUCTION_DEMO_SEED=true npm run db:seed-production-demo --workspace @crewensia/server`.
+
 You no longer need to start the client, API, or Prisma migrations separately for the Docker workflow. The existing individual npm commands remain available for development outside Docker.
 
 ### Run locally
